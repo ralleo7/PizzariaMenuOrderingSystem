@@ -9,17 +9,21 @@ namespace PizzaDeliverySystem
     {
         static List<Order> orders = new List<Order>();
         static Menu menu = MakeMenu();
-        static Customer customer;
+        static CustomerManager customerManager = new CustomerManager();
 
         static void Main(string[] args)
         {
-            customer = ChooseCustomer();
+            customerManager.AddCustomer(1, "John Doe", "john@example.com", "123 Main St");
+            customerManager.AddCustomer(2, "Alice Smith", "alice@example.com", "456 Elm St");
+            customerManager.AddCustomer(3, "Bob Johnson", "bob@example.com", "789 Oak St");
 
-            Console.WriteLine($"Welcome, {customer.Name}, to Big Mama pizzaria");
+            Customer customer = ChooseCustomer();
+
+            Console.WriteLine($"Welcome, {customer.Name}, to Big Mama pizzeria");
 
             while (true)
             {
-                Console.WriteLine("Would you like to place an order, find existing orders, or exit? (order/find/exit)");
+                Console.WriteLine("Would you like to place an order, find existing orders, search for a customer, update a customer, delete a customer, or exit? (order/find/findcustomer/update/delete/exit)");
                 string input = Console.ReadLine().ToLower();
 
                 if (input == "exit")
@@ -29,11 +33,29 @@ namespace PizzaDeliverySystem
                 }
                 else if (input == "order")
                 {
-                    PlaceOrder();
+                    PlaceOrder(customer);
                 }
                 else if (input == "find")
                 {
-                    FindOrders();
+                    FindOrders(customer);
+                }
+                else if (input == "findcustomer")
+                {
+                    Console.WriteLine("Enter the name of the customer you're looking for:");
+                    string searchName = Console.ReadLine();
+                    customerManager.SearchCustomer(searchName);
+                }
+                else if (input == "update")
+                {
+                    UpdateCustomer();
+                }
+                else if (input == "delete")
+                {
+                    DeleteCustomer();
+                }
+                else if (input == "orderadmin")
+                {
+                    OrderAdminO();
                 }
                 else
                 {
@@ -42,7 +64,69 @@ namespace PizzaDeliverySystem
             }
         }
 
-        static void PlaceOrder()
+
+        static void OrderAdminO()
+        {
+            while (true)
+            {
+                Console.WriteLine("Welcome, Order Admin!");
+                Console.WriteLine("What would you like to do? (create/delete/update/exit)");
+                string adminInput = Console.ReadLine().ToLower();
+                switch (adminInput)
+                {
+                    case "create":
+                        OrderAdmin.CreateOrder(orders, menu);
+                        break;
+                    case "delete":
+                        OrderAdmin.DeleteOrder(orders);
+                        break;
+                    case "update":
+                        OrderAdmin.UpdateOrder(orders, menu);
+                        break;
+                    case "exit":
+                        Console.WriteLine("Exiting Order Admin mode.");
+                        return;
+                    default:
+                        Console.WriteLine("Invalid input!");
+                        break;
+                }
+            }
+        }
+        static void UpdateCustomer()
+        {
+            Console.WriteLine("Enter the ID of the customer to update:");
+            int customerIdToUpdate = int.Parse(Console.ReadLine());
+            Console.WriteLine("Enter the new name for the customer:");
+            string newName = Console.ReadLine();
+            Console.WriteLine("Enter the new email for the customer:");
+            string newEmail = Console.ReadLine();
+            Console.WriteLine("Enter the new address for the customer:");
+            string newAddress = Console.ReadLine();
+            customerManager.UpdateCustomer(customerIdToUpdate, newName, newEmail, newAddress);
+        }
+
+        static void DeleteCustomer()
+        {
+            Console.WriteLine("Enter the ID of the customer to delete:");
+            int customerIdToDelete = int.Parse(Console.ReadLine());
+            customerManager.DeleteCustomer(customerIdToDelete);
+        }
+
+        static Customer ChooseCustomer()  
+
+        {
+            Console.WriteLine("Please enter your name:");
+            string name = Console.ReadLine();
+            Console.WriteLine("Please enter your id");
+            int id = int.Parse(Console.ReadLine());
+            Console.WriteLine("Please enter your email:");
+            string email = Console.ReadLine();
+            Console.WriteLine("Please enter your address:");
+            string address = Console.ReadLine();
+            return new Customer(id, name, email, address);
+        }
+
+        static void PlaceOrder(Customer customer)
         {
             Order order = new Order();
 
@@ -130,7 +214,7 @@ namespace PizzaDeliverySystem
 
 
 
-        static void FindOrders()
+        static void FindOrders(Customer customer)
         {
             if (orders.Count == 0)
             {
@@ -150,7 +234,7 @@ namespace PizzaDeliverySystem
             Console.WriteLine("");
             Console.WriteLine("Order Details: ");
             Console.WriteLine("Order Number: "+orderNumber);
-            order.PrintOrder(customer.Name);
+            order.PrintOrder($"{customer.Name}, {customer.Id} ,{customer.Email} , {customer.Address}");
         }
 
         static Menu MakeMenu()
@@ -162,7 +246,7 @@ namespace PizzaDeliverySystem
             menu.AddPizza(new Pizza("2.Vesuvio", new List<string> { "Tomato sauce", "Chesse", "Ham" }, 65, 2));
             menu.AddPizza(new Pizza("3.Capricciosa", new List<string> { "Tomato sauce", "Mozzarella", "Ham", "Mushrooms" }, 75, 3));
             menu.AddPizza(new Pizza("4.Calzone", new List<string> { "Baked Pizza with Tomato sauce", "Chesse", "Ham", "Mushrooms" }, 75, 4));
-            menu.AddPizza(new Pizza("5.Quattro Stagioni", new List<string> { "Tomato","Chesse","Ham","Mushrooms","Shrimp","Peppers" }, 80, 5));
+            menu.AddPizza(new Pizza("5.Quattro Stagioni", new List<string> { "Tomato", "Chesse", "Ham", "Mushrooms", "Shrimp", "Peppers" }, 80, 5));
             // Adding beverage
             menu.AddBeverage(new Beverage("1.Coke", 20, 1));
             menu.AddBeverage(new Beverage("2.Fanta", 20, 2));
@@ -176,14 +260,15 @@ namespace PizzaDeliverySystem
 
 
             return menu;
-        }
 
-        static Customer ChooseCustomer()
-        {
-        
-            Console.WriteLine("Please choose your name, please:");
-            string name = Console.ReadLine();
-            return new Customer(name);
+
+            // static Customer ChooseCustomer()
+            //  {
+            //
+            //  Console.WriteLine("Please choose your name, please:");
+            // string name = Console.ReadLine();
+            // return new Customer();
+            // }
         }
     } 
 }
